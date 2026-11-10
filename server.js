@@ -22,6 +22,11 @@ const PORT = process.env.PORT || 3000;
 // Connexion à la base de données MongoDB
 
 async function startServer() {
+    if (!process.env.MONGODB_URI) {
+        console.error('Missing MONGODB_URI. Add it to your .env file before starting the server.');
+        process.exit(1);
+    }
+
     try {
         await mongoose.connect(process.env.MONGODB_URI);
         console.log('Connected to MongoDB');

@@ -56,6 +56,8 @@ Get a server running and connected to MongoDB before you build anything else.
 
 - Initialise the project and install your dependencies.
 - Store your MongoDB connection string in a `.env` file (never hard-code it).
+- Copy `.env.example` to `.env` and set `MONGODB_URI` to your running local MongoDB instance or MongoDB Atlas connection string. The example uses `mongodb://127.0.0.1:27017/readmore`.
+- Start the API with `npm run dev`.
 - Connect to MongoDB on startup and only start listening once the connection succeeds.
 - Add a health-check route (`GET /`) that returns a simple JSON message.
 
