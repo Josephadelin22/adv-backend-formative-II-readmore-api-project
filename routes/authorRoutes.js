@@ -7,15 +7,15 @@ const {
   updateAuthor,
   deleteAuthor,
   getAuthorStats 
-} = require('../controllers/authorController');
+} = require('../controllers/authorControllers');
 
-const { getBooksByAuthor } = require('../controllers/bookController');
+const { getBooksByAuthorId } = require('../controllers/bookController');
 
 // 1. Route spécifique pour les statistiques d'un auteur (AVANT /:id)
 router.get('/:id/stats', getAuthorStats);
 
 // 2. Route pour récupérer les livres d'un auteur spécifique
-router.get('/:id/books', getBooksByAuthor);
+router.get('/:id/books', getBooksByAuthorId);
 
 // 3. Routes CRUD de base
 router.route('/')
