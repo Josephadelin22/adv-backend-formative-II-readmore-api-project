@@ -1,26 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const {
-    createAuthor,
-    getAllAuthors,
-    getAuthorById,
-    updateAuthor,
-    deleteAuthor
-} = require('../controllers/authorControllers');
+  createAuthor,
+  getAllAuthors,
+  getAuthorById,
+  updateAuthor,
+  deleteAuthor,
+  getAuthorStats 
+} = require('../controllers/authorController');
 
-const { getBooksByAuthorId } = require('../controllers/bookController');
+const { getBooksByAuthor } = require('../controllers/bookController');
 
-// Routes pour /authors
+// 1. Route spécifique pour les statistiques d'un auteur (AVANT /:id)
+router.get('/:id/stats', getAuthorStats);
+
+// 2. Route pour récupérer les livres d'un auteur spécifique
+router.get('/:id/books', getBooksByAuthor);
+
+// 3. Routes CRUD de base
 router.route('/')
-    .post(createAuthor) // Créer un nouvel auteur
-    .get(getAllAuthors); // Récupérer tous les auteurs
-    
-// Routes pour /authors/:id
-router.route('/:id')
-    .get(getAuthorById) // Récupérer un auteur par ID
-    .put(updateAuthor) // Mettre à jour un auteur par ID
-    .delete(deleteAuthor); // Supprimer un auteur par ID
+  .post(createAuthor)
+  .get(getAllAuthors);
 
-router.get('/:id/books', getBooksByAuthorId);
+router.route('/:id')
+  .get(getAuthorById)
+  .put(updateAuthor)
+  .delete(deleteAuthor);
 
 module.exports = router;
