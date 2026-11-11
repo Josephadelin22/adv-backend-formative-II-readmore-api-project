@@ -85,12 +85,21 @@ exports.updateAuthor = async (req, res) => {
     }
 };
 
-// 5. Delete an author by ID
-
+// 5. Supprimer un auteur avec la règle métier des orphelins (Option A -> 409)
 exports.deleteAuthor = async (req, res) => {
     try {
-        const author = await Author.findByIdAndDelete(req.params.id);
+        const authorId = req.params.id;
 
+        // RÈGLE 4 : Vérifier si l'auteur a encore des livres
+        const booksCount = await Book.countDocuments({ author: authorId });
+        if (booksCount > 0) {
+            return res.status(409).json({
+                success: false,
+                message: 'Cannot delete author because they still have associated books. Delete or reassign their books first.'
+            });
+        }
+
+        const author = await Author.findByIdAndDelete(authorId);
         if (!author) {
             return res.status(404).json({
                 success: false,

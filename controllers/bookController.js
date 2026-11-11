@@ -32,6 +32,27 @@ exports.createBook = async (req, res) => {
                 message: 'Price must be greater than zero.'
             });
         }
+
+        const currentYear = new Date().getFullYear();
+        if (publishedYear < 1450 || publishedYear > currentYear) {
+            return res.status(422).json({
+                success: false,
+                message: `Published year must be between 1450 and ${currentYear}.`
+            });
+        }
+
+        const populatedBook = await book.populate('author');
+        
+        const book = await Book.create(req.body);
+        res.status(201).json({
+            success: true,
+            data: populatedBook
+        });
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 
@@ -40,14 +61,63 @@ exports.createBook = async (req, res) => {
 
 exports.getAllBooks = async (req, res) => {
     try {
-        const books = await Book.find().populate('author');
+        const { genre, minPrice, maxPrice, author, search, sort, order, page = 1, limit = 10 } = req.query;
+        
+        // Objet de requête dynamique pour Mongoose
+        const queryObj = {};
+
+        // 1. Filtrer par genre (insensible à la casse)
+        if (genre) {
+            queryObj.genre = { $regex: new RegExp(genre, 'i') };
+        }
+
+        // 2. Filtrer par plage de prix (min / max)
+        if (minPrice || maxPrice) {
+            queryObj.price = {};
+            if (minPrice) queryObj.price.$gte = Number(minPrice);
+            if (maxPrice) queryObj.price.$lte = Number(maxPrice);
+        }
+
+        // 3. Filtrer par ID d'auteur
+        if (author) {
+            queryObj.author = author;
+        }
+
+        // 4. Recherche textuelle dans le titre (insensible à la casse)
+        if (search) {
+            queryObj.title = { $regex: search, $options: 'i' };
+        }
+
+        // Pagination : calcul du skip
+        const pageNum = parseInt(page, 10);
+        const limitNum = parseInt(limit, 10);
+        const skip = (pageNum - 1) * limitNum;
+
+        // Construction de la requête Mongoose de base
+        let query = Book.find(queryObj).populate('author');
+
+        // 5. Tri (sort + order)
+        if (sort) {
+            const sortOrder = order === 'desc' ? -1 : 1;
+            query = query.sort({ [sort]: sortOrder });
+        }
+
+        // Application de la pagination
+        query = query.skip(skip).limit(limitNum);
+
+        const books = await query;
+        const total = await Book.countDocuments(queryObj);
+
         res.status(200).json({
             success: true,
+            page: pageNum,
+            limit: limitNum,
+            total: total,
             count: books.length,
             data: books
         });
     } catch (error) {
-        res.status(400).json({
+        res.status(500).json({
             success: false,
             message: error.message
         });
