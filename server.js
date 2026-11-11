@@ -3,9 +3,14 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 
+const authorRoutes = require('./routes/authorRoutes');
+const bookRoutes = require('./routes/bookRoutes');
+
 const app = express();
 //middleware pour les données JSON
 app.use(express.json());
+app.use('/authors', authorRoutes);
+app.use('/books', bookRoutes);
 
 //health check
 
